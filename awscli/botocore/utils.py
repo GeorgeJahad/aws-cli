@@ -1296,7 +1296,7 @@ class S3RegionRedirector(object):
             location = response[1]['ResponseMetadata']['HTTPHeaders']['location']
         except KeyError:
             location = None
-        if location is not None and self._s3_config.get('use_redirection_location'):
+        if location is not None and self._s3_config.get('use_location_for_redirects'):
             # Instead of using the region header, use the location header
             endpoint = location
         else:
