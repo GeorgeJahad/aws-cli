@@ -1223,6 +1223,7 @@ class S3RegionRedirector(object):
         self._cache = cache
         if self._cache is None:
             self._cache = {}
+        self._s3_config = client.meta.config.s3
 
         # This needs to be a weak ref in order to prevent memory leaks on
         # python 2.6
@@ -1291,9 +1292,29 @@ class S3RegionRedirector(object):
         client_region = request_dict['context'].get('client_region')
         new_region = self.get_bucket_region(bucket, response)
 
+        try:
+            location = response[1]['ResponseMetadata']['HTTPHeaders']['location']
+        except KeyError:
+            location = None
+        if location is not None and self._s3_config.get('use_redirection_location'):
+            # Instead of using the region header, use the location header
+            endpoint = location
+        else:
+            if new_region is None:
+                logger.debug(
+                    "S3 client configured for region %s but the bucket %s is not "
+                    "in that region and the proper region could not be "
+                    "automatically determined." % (client_region, bucket))
+                return
 
-        # Instead of using the region header, use the location header
-        endpoint = response[1]['ResponseMetadata']['HTTPHeaders']['location']
+            logger.debug(
+                "S3 client configured for region %s but the bucket %s is in region"
+                " %s; Please configure the proper region to avoid multiple "
+                "unnecessary redirects and signing attempts." % (
+                    client_region, bucket, new_region))
+            endpoint = self._endpoint_resolver.resolve('s3', new_region)
+            endpoint = endpoint['endpoint_url']
+
         signing_context = {
             'region': new_region,
             'bucket': bucket,
