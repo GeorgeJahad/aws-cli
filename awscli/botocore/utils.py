@@ -1291,20 +1291,6 @@ class S3RegionRedirector(object):
         client_region = request_dict['context'].get('client_region')
         new_region = self.get_bucket_region(bucket, response)
 
-        # if new_region is None:
-        #     logger.debug(
-        #         "S3 client configured for region %s but the bucket %s is not "
-        #         "in that region and the proper region could not be "
-        #         "automatically determined." % (client_region, bucket))
-        #     return
-
-        # logger.debug(
-        #     "S3 client configured for region %s but the bucket %s is in region"
-        #     " %s; Please configure the proper region to avoid multiple "
-        #     "unnecessary redirects and signing attempts." % (
-        #         client_region, bucket, new_region))
-        # endpoint = self._endpoint_resolver.resolve('s3', new_region)
-        # endpoint = endpoint['endpoint_url']
         endpoint = response[1]['ResponseMetadata']['HTTPHeaders']['location']
 
 
