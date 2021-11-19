@@ -1291,9 +1291,9 @@ class S3RegionRedirector(object):
         client_region = request_dict['context'].get('client_region')
         new_region = self.get_bucket_region(bucket, response)
 
+
+
         endpoint = response[1]['ResponseMetadata']['HTTPHeaders']['location']
-
-
         signing_context = {
             'region': new_region,
             'bucket': bucket,
