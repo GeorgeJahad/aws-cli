@@ -1292,7 +1292,7 @@ class S3RegionRedirector(object):
         new_region = self.get_bucket_region(bucket, response)
 
 
-
+        # Instead of using the region header, use the location header
         endpoint = response[1]['ResponseMetadata']['HTTPHeaders']['location']
         signing_context = {
             'region': new_region,
